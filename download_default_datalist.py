@@ -33,35 +33,52 @@ logging.basicConfig(
     format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
     level=logging.INFO)
 
+URL_DATALIST_INDEX = "https://d.ailemon.net/asrt_assets/datalist/index.json"
+
+# default downlaod to ${PWD}/datalist/
 DEFAULT_DATALIST_PATH = 'datalist/'
 if not os.path.exists(DEFAULT_DATALIST_PATH):
     os.makedirs(DEFAULT_DATALIST_PATH)
 
-URL_DATALIST_INDEX = "https://d.ailemon.net/asrt_assets/datalist/index.json"
-rsp_index = requests.get(URL_DATALIST_INDEX)
-rsp_index.encoding = 'utf-8'
-if rsp_index.ok:
-    logging.info('Has connected to ailemon\'s download server...')
-else:
-    logging.error('%s%s', 'Can not connected to ailemon\'s download server.',
-                  'please check your network connection.')
 
-index_json = json.loads(rsp_index.text)
-if index_json['status_code'] != 200:
-    raise Exception(index_json['status_message'])
+def download_datalist():
+    # get json from url
+    rsp_index = requests.get(URL_DATALIST_INDEX)
+    rsp_index.encoding = 'utf-8'
+    if rsp_index.ok:
+        logging.info('Has connected to ailemon\'s download server...')
+    else:
+        logging.error('%s%s', 'Can not connected to ailemon\'s download server.',
+                    'please check your network connection.')
 
-body = index_json['body']
-logging.info('start to download datalist from ailemon\'s download server...')
+    index_json = json.loads(rsp_index.text)
+    if index_json['status_code'] != 200:
+        raise Exception(index_json['status_message'])
 
-url_prefix = body['url_prefix']
-for i in range(len(body['datalist'])):
-    print(i, body['datalist'][i]['name'])
-print(len(body['datalist']), 'all datalist')
-num = input('Please choose which you select: (default all)')
-if len(num) == 0:
-    num = len(body['datalist'])
-else:
-    num = int(num)
+    body = index_json['body']
+    logging.info('start to download datalist from ailemon\'s download server...')
+
+    for i in range(len(body['datalist'])):
+        print(i, body['datalist'][i]['name'])
+    print(len(body['datalist']), 'all datalist')
+
+    # select whichone to download
+    num = input('Please choose which you select: (default all)')
+    if len(num) == 0:
+        num = len(body['datalist'])
+    else:
+        num = int(num)
+    
+    # real download
+    if num == len(body['datalist']):
+        for i in range(len(body['datalist'])):
+            deal_download(body['datalist'][i], body['url_prefix'], DEFAULT_DATALIST_PATH)
+    else:
+        deal_download(body['datalist'][num], body['url_prefix'], DEFAULT_DATALIST_PATH)
+
+    logging.info('%s%s%s', 'Datalist files download complete. ',
+                'Please remember to download these datasets from ',
+                body['dataset_download_page_url'])
 
 
 def deal_download(datalist_item, url_prefix_str, datalist_path):
@@ -93,12 +110,5 @@ def deal_download(datalist_item, url_prefix_str, datalist_path):
     logging.info('%s `%s` %s', 'unzip', zipfilename, 'complete')
 
 
-if num == len(body['datalist']):
-    for i in range(len(body['datalist'])):
-        deal_download(body['datalist'][i], body['url_prefix'], DEFAULT_DATALIST_PATH)
-else:
-    deal_download(body['datalist'][num], body['url_prefix'], DEFAULT_DATALIST_PATH)
-
-logging.info('%s%s%s', 'Datalist files download complete. ',
-             'Please remember to download these datasets from ',
-             body['dataset_download_page_url'])
+if __name__ == "__main__":
+    download_datalist()

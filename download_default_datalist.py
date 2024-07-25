@@ -1,4 +1,4 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright 2016-2099 Ailemon.net
@@ -28,6 +28,7 @@ import logging
 import json
 import requests
 import zipfile
+import sys
 
 logging.basicConfig(
     format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
@@ -35,8 +36,27 @@ logging.basicConfig(
 
 URL_DATALIST_INDEX = "https://d.ailemon.net/asrt_assets/datalist/index.json"
 
+DATASET_DOWNLOAD_DIR = "/data/speech_data"
+
+params = sys.argv[1:]
+
+if len(params) > 0:
+    DATASET_DOWNLOAD_DIR = params[0]
+
+if len(params) == 0:
+    logging.warn(f'No download directory specified, use default directory [{DATASET_DOWNLOAD_DIR}.')
+    user_confirm = input('Are you sure to download all datalist? (y/n) ')
+    if user_confirm.lower() == 'y':
+        pass
+    else:
+        sys.exit(0)
+
+if not os.path.exists(DATASET_DOWNLOAD_DIR):
+    logging.error('%s%s', 'Can not find the directory ', DATASET_DOWNLOAD_DIR)
+    sys.exit(1)
+
 # default downlaod to ${PWD}/datalist/
-DEFAULT_DATALIST_PATH = 'datalist/'
+DEFAULT_DATALIST_PATH = os.path.join(DATASET_DOWNLOAD_DIR, 'datalist/')
 if not os.path.exists(DEFAULT_DATALIST_PATH):
     os.makedirs(DEFAULT_DATALIST_PATH)
 

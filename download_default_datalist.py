@@ -40,16 +40,15 @@ DATASET_DOWNLOAD_DIR = "/data/speech_data"
 
 params = sys.argv[1:]
 
-if len(params) > 0:
-    DATASET_DOWNLOAD_DIR = params[0]
-
 if len(params) == 0:
-    logging.warn(f'No download directory specified, use default directory [{DATASET_DOWNLOAD_DIR}.')
-    user_confirm = input('Are you sure to download all datalist? (y/n) ')
+    print(f'[WARN] No download directory specified, use default directory [{DATASET_DOWNLOAD_DIR}]')
+    user_confirm = input('Are you sure to download datalist to there? (y/n/input_new_dir) > ')
     if user_confirm.lower() == 'y':
         pass
-    else:
+    elif user_confirm.lower() == 'n':
         sys.exit(0)
+    else:
+        DATASET_DOWNLOAD_DIR = user_confirm
 
 if not os.path.exists(DATASET_DOWNLOAD_DIR):
     logging.error('%s%s', 'Can not find the directory ', DATASET_DOWNLOAD_DIR)
@@ -83,7 +82,7 @@ def download_datalist():
     print(len(body['datalist']), 'all datalist')
 
     # select whichone to download
-    num = input('Please choose which you select: (default all)')
+    num = input('Please choose which you select: (default all) > ')
     if len(num) == 0:
         num = len(body['datalist'])
     else:

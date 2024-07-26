@@ -48,6 +48,11 @@ opt = Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, decay=0.0, epsilon=10
 ms = ModelSpeech(sm251bn, feat, max_label_length=64)
 
 # ms.load_model('save_models/' + sm251bn.get_model_name() + '.model.h5')
-ms.train_model(optimizer=opt, data_loader=train_data,
-               epochs=50, save_step=1, batch_size=16, last_epoch=0)
+ms.train_model(optimizer=opt,
+               data_loader=train_data,
+               epochs=50,
+               save_step=1,
+               batch_size=16,
+               last_epoch=0)
+
 ms.save_model('save_models/' + sm251bn.get_model_name())
